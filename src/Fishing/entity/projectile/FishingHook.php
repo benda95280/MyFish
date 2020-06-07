@@ -51,16 +51,14 @@ class FishingHook extends Projectile {
 
 		$hasUpdate = parent::onUpdate($currentTick);
 		
-		$inGround = $this->level->getBlock($this)->isSolid();
-
-		if($inGround){
+		if($this->isInsideOfSolid()){
 			$random = new Random((int) (microtime(true) * 1000) + mt_rand());
 			$this->motion->x *= $random->nextFloat() * 0.2;
 			$this->motion->y *= $random->nextFloat() * 0.2;
 			$this->motion->z *= $random->nextFloat() * 0.2;
 		}		
 		
-		if (!$inGround) {
+		if (!$this->isInsideOfSolid()) {
 			$f6 = 0.92;
 
 			if($this->onGround or $this->isCollidedHorizontally){
@@ -104,7 +102,6 @@ class FishingHook extends Projectile {
 						if ($this->bubbleTicks === 0) {
 							$this->attractFish();
 							$this->bubbleTicks = 10;
-							var_dump("attractFish");
 						}
 						else {
 							$this->bubbleTicks--;
@@ -121,7 +118,6 @@ class FishingHook extends Projectile {
 					if ($this->bitesTicks === 0) {
 						$this->fishBites();
 						$this->bitesTicks = mt_rand(1, 3) * 20;
-						var_dump("bitesFish");
 					}
 					else {
 						$this->bitesTicks--;
@@ -143,7 +139,7 @@ class FishingHook extends Projectile {
 			$this->motion->y *= $f6;
 			$this->motion->z *= $f6;
 		}
-		var_dump("attractTimer: ".$this->attractTimer." coughtTimer: ".$this->coughtTimer." bubbleTimer: ".$this->bubbleTimer);
+		// var_dump("attractTimer: ".$this->attractTimer." coughtTimer: ".$this->coughtTimer." bubbleTimer: ".$this->bubbleTimer);
 		$this->timings->stopTiming();
 
 		return $hasUpdate;
