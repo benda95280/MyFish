@@ -1,0 +1,7 @@
+name: Fishing
+main: Fishing\Fishing
+version: 0.1
+api: [3.0.0]
+load: STARTUP
+author: benda95280
+description: Fork of TeaSpoon for Fishing
