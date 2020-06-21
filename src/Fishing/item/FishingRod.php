@@ -6,10 +6,8 @@ declare(strict_types = 1);
 namespace Fishing\item;
 
 use Fishing\entity\projectile\FishingHook;
-use Fishing\item\enchantment\Enchantment;
 use Fishing\Fishing;
 use Fishing\Session;
-use Fishing\Utils;
 use Fishing\utils\FishingLootTable;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
@@ -17,6 +15,7 @@ use pocketmine\entity\projectile\Projectile;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\item\Durable;
 use pocketmine\item\Item;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
@@ -64,7 +63,7 @@ class FishingRod extends Durable {
 						$rand = mt_rand(30, 100);
 					// }
 					if($this->hasEnchantments()){
-						foreach(Utils::getEnchantments($this) as $enchantment){
+						foreach($this->getEnchantments() as $enchantment){
 							switch($enchantment->getId()){
 								case Enchantment::LURE:
 									$divisor = $enchantment->getLevel() * 0.50;

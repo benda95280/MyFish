@@ -12,7 +12,7 @@ https://github.com/TuranicTeam/Altay
 
 # MyFish
 
-Plugin that add support to e able to fish in PocketMine !
+Plugin that add support to be able to fish in PocketMine !
 This plugin is not intended to be like Vanilla
 
 # Looking to add :
