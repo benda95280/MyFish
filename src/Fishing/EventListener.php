@@ -10,7 +10,8 @@ namespace Fishing;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\event\Listener;
-use pocketmine\event\player\{PlayerItemHeldEvent, PlayerLoginEvent, PlayerQuitEvent};
+use pocketmine\event\entity\EntityInventoryChangeEvent;
+use pocketmine\event\player\{PlayerItemHeldEvent, PlayerLoginEvent, PlayerQuitEvent, PlayerDeathEvent};
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
@@ -36,14 +37,26 @@ class EventListener implements Listener {
 		$session = Fishing::getInstance()->getSessionById($ev->getPlayer()->getId());
 		if($session instanceof Session){
 			if($session->fishing){
-				if($ev->getSlot() != $session->lastHeldSlot){
-					$session->unsetFishing();
+				$inventory = $ev->getPlayer()->getInventory();
+				$oldItem = $inventory->getItemInHand();
+				$newItem = $ev->getItem();
+				if ($oldItem !== $newItem) {
+					$session->unsetFishing();					
 				}
 			}
-
-			$session->lastHeldSlot = $ev->getSlot();
 		}
 	}
+	
+	public function onDeath(PlayerDeathEvent $ev) {
+		$session = Fishing::getInstance()->getSessionById($ev->getPlayer()->getId());
+		if($session instanceof Session){
+			if($session->fishing){
+				$session->unsetFishing();	
+			}					
+
+		}		
+	}
+
 	
 	/**
 	 * @param PlayerLoginEvent $ev

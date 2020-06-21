@@ -4,7 +4,8 @@ declare(strict_types = 1);
 
 namespace Fishing\entity\projectile;
 
-
+use Fishing\Fishing;
+use Fishing\Session;
 use pocketmine\block\StillWater;
 use pocketmine\block\Water;
 use pocketmine\block\Liquid;
@@ -45,6 +46,25 @@ class FishingHook extends Projectile {
 	public function onUpdate(int $currentTick): bool{
 		if($this->isFlaggedForDespawn() || !$this->isAlive()){
 			return false;
+		}
+		
+		$oe = $this->getOwningEntity();
+		
+		//Remove if Owner is null
+		if ($oe === null) {
+			if(!$this->isFlaggedForDespawn()){
+				$this->flagForDespawn();
+			}			
+		}
+			
+		//Remove if Owner too far
+		if($oe instanceof Player){
+			if ($this->getPosition()->distance($oe->getPosition()) > 25) {
+				$session = Fishing::getInstance()->getSessionById($oe->getId());
+				if($session instanceof Session){
+					$session->unsetFishing();
+				}	
+			}
 		}
 
 		$this->timings->startTiming();
@@ -90,7 +110,6 @@ class FishingHook extends Projectile {
 					//If bubble timer finished, catch it !
 					if ($this->bubbleTimer <= 0 && $this->coughtTimer === 0) {
 						$this->coughtTimer = mt_rand(3, 5) * 20;
-						$oe = $this->getOwningEntity();
 						if($oe instanceof Player){
 							$oe->sendTip("A fish bites!");
 						}
