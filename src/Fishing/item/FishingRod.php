@@ -13,14 +13,14 @@ use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\projectile\Projectile;
 use pocketmine\event\entity\ProjectileLaunchEvent;
-use pocketmine\item\Durable;
+use pocketmine\item\Tool;
 use pocketmine\item\Item;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class FishingRod extends Durable {
+class FishingRod extends Tool {
 	public function __construct($meta = 0){
 		parent::__construct(Item::FISHING_ROD, $meta, "Fishing Rod");
 	}
