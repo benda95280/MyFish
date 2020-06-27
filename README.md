@@ -14,6 +14,7 @@ Added level system, it change :
 - Chance to catch something
 - Precision when you lanch the hook (More level, more precise)
 - A plugin is availaible in my repo for ScoreBoard
+- Any return, idea on it (Issue on GH / Discord) would be apreciated !
 
 -----------------
 
@@ -21,6 +22,7 @@ Added level system, it change :
 
 Plugin that add support to be able to fish in PocketMine !
 This plugin is not intended to be like Vanilla
+Support Level (MAX 10)
 
 # Looking to add :
 - [X] Level support
