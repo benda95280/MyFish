@@ -8,6 +8,7 @@ namespace Fishing\item;
 use Fishing\entity\projectile\FishingHook;
 use Fishing\Fishing;
 use Fishing\Session;
+use Fishing\utils\FishingLevel;
 use Fishing\utils\FishingLootTable;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
@@ -37,13 +38,33 @@ class FishingRod extends Tool {
 			$session = Fishing::getInstance()->getSessionById($player->getId());
 			if($session instanceof Session){
 				if(!$session->fishing){
+					
 					$nbt = Entity::createBaseNBT($player->add(0, $player->getEyeHeight(), 0), $directionVector, $player->yaw, $player->pitch);
 
 					/** @var FishingHook $projectile */
 					$projectile = Entity::createEntity($this->getProjectileEntityType(), $player->getLevel(), $nbt, $player);
 					if($projectile !== null){
-						$projectile->setMotion($projectile->getMotion()->multiply($this->getThrowForce()));
+						//Level impact ThrowForce
+						$throwForce = $this->getThrowForce();
+						
+						$throwForcePercent = FishingLevel::getFishingLevel($player)*6-30;
+						$throwForceToAdd = ($throwForce / 100) * $throwForcePercent ;
+						$throwForce = $throwForce + $throwForceToAdd;
+						$projectile->setMotion($projectile->getMotion()->multiply($throwForce));
 					}
+					
+					//change the location where sending hook projectile
+
+						$degreeToRand = 30/(FishingLevel::getFishingLevel($player) == 0 ? 1 : FishingLevel::getFishingLevel($player));
+						$randomRotation = floor(rand()/getrandmax()*($degreeToRand*2)-$degreeToRand) ;
+						$randomRotationRadian = $randomRotation * (M_PI/180);
+						$hookMotion = $projectile->getMotion();
+						$theta = deg2rad($randomRotation);
+						$cos = cos($theta);
+						$sin = sin($theta);
+						$px = $hookMotion->x * $cos - $hookMotion->z * $sin; 
+						$pz = $hookMotion->x * $sin + $hookMotion->z * $cos;
+						$projectile->setMotion(new Vector3($px, $hookMotion->y, $pz));
 
 					if($projectile instanceof Projectile){
 						$player->getServer()->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
@@ -103,10 +124,21 @@ class FishingRod extends Tool {
 						//	}else{
 						//		$lvl = 0;
 						//	}
-							$item = FishingLootTable::getRandom($lvl);
-							$player->getInventory()->addItem($item);
+							//Level of player impact chance of get something, When level > 4, no more impacted
+							//Level of Enchant LUCK_OF_THE_SEA impact chance
+							if (FishingLevel::getFishingLevel($player) < (4+$lvl) AND mt_rand(FishingLevel::getFishingLevel($player), (10+$lvl)) <= (3+$lvl)) {
+								$item = FishingLootTable::getRandom($lvl);
+								$player->getInventory()->addItem($item);
+								FishingLevel::addFishingExp(mt_rand(3, 6), $player);
+								$player->addXp(mt_rand(3, 6));
+							}
+							else {
+								FishingLevel::addFishingExp(mt_rand(1, 3), $player);
+								$player->addXp(mt_rand(1, 3),false);
+								$player->sendTip("Failed :(");
+							}
+							
 
-							$player->addXp(mt_rand(1, 6));
 						}
 					}
 				}

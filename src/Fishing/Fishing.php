@@ -14,6 +14,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 
 use Fishing\utils\FishingLootTable;
+use Fishing\utils\FishingLevel;
 use Fishing\entity\EntityManager;
 use Fishing\item\ItemManager;
 
@@ -25,6 +26,7 @@ class Fishing extends PluginBase {
 	private $sessions = [];
 	/** @var Config */
 	public static $cacheFile;
+	public static $levelFile;
 	
 	public static $randomFishingLootTables = true;
 	public static $registerVanillaEnchantments = true;
@@ -42,6 +44,7 @@ class Fishing extends PluginBase {
 	
     public function onEnable(){
 		FishingLootTable::init();
+		FishingLevel::init();
 		ItemManager::init();
 		EntityManager::init();
 		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
