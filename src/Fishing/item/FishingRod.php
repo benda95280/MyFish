@@ -98,7 +98,7 @@ class FishingRod extends Tool {
 							}
 						}
 
-						$projectile->attractTimer = $rand * 0;
+						$projectile->baseTimer = $rand * 20;
 
 						$session->fishingHook = $projectile;
 						$session->fishing = true;

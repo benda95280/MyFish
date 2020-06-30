@@ -32,11 +32,13 @@ class FishingHook extends Projectile {
 	public $width = 0.25;
 	public $length = 0.25;
 	public $height = 0.25;
+	public $baseTimer = 0;
 	public $coughtTimer = 0;
 	public $bubbleTimer = 0;
 	public $bubbleTicks = 0;
 	public $bitesTicks = 0;
 	public $attractTimer = 0;
+	public $attractTimerTicks = 0;
 	protected $gravity = 0.1;
 	protected $drag = 0.05;
 	protected $touchedWater = false;
@@ -66,6 +68,10 @@ class FishingHook extends Projectile {
 				}	
 			}
 		}
+		
+		//calculate timer for attractTimer
+		$lightLevelAtHook = $this->level->getBlockSkyLightAt(intval($this->x), intval($this->y), intval($this->z));
+		$this->attractTimer = ($this->baseTimer * (((-1/15)*$lightLevelAtHook)+2)) - $this->attractTimerTicks;
 
 		$this->timings->startTiming();
 
@@ -100,9 +106,9 @@ class FishingHook extends Projectile {
 				//Little annimation floating
 				if ($currentTick % 60 === 0) $this->motion->y =-0.02;
 				//Wait Wait, we are waiting the fish
-				if($this->attractTimer === 0){
+				if($this->attractTimer <= 0){
 					//Set bubble timer, fish is near !
-					if ($this->bubbleTimer === 0 && $this->coughtTimer === 0) {
+					if ($this->bubbleTimer === 0 && $this->coughtTimer <= 0) {
 						$this->bubbleTimer = mt_rand(5, 10) * 20;
 					}
 					else if ($this->bubbleTimer > 0) {
@@ -110,7 +116,7 @@ class FishingHook extends Projectile {
 					}
 					
 					//If bubble timer finished, catch it !
-					if ($this->bubbleTimer <= 0 && $this->coughtTimer === 0) {
+					if ($this->bubbleTimer <= 0 && $this->coughtTimer <= 0) {
 						$this->coughtTimer = mt_rand(3, 5) * 20;
 						if($oe instanceof Player){
 							$oe->sendTip("Il y a un poisson !");
@@ -131,7 +137,7 @@ class FishingHook extends Projectile {
 					}
 				}
 				elseif($this->attractTimer > 0){
-					$this->attractTimer--;
+					$this->attractTimerTicks++;
 				}
 				
 				if($this->coughtTimer > 0){
@@ -145,10 +151,11 @@ class FishingHook extends Projectile {
 					}
 	
 					//Too late, fish has gone, reset timer
-					if ($this->coughtTimer === 0)
+					if ($this->coughtTimer <= 0)
 					{
 						$oe->sendTip("Trop tard, il est parti ...");
-						$this->attractTimer = mt_rand(30, 100) * 20;
+						$this->baseTimer = mt_rand(30, 100) * 20;
+						$this->attractTimerTicks = 0;
 					}
 				}
 				
@@ -165,7 +172,7 @@ class FishingHook extends Projectile {
 			$this->motion->y *= $f6;
 			$this->motion->z *= $f6;
 		}
-		// var_dump("attractTimer: ".$this->attractTimer." coughtTimer: ".$this->coughtTimer." bubbleTimer: ".$this->bubbleTimer);
+		// var_dump("baseTimer: ".$this->baseTimer." attractTimer: ".$this->attractTimer." attractTimerTicks: ".$this->attractTimerTicks." coughtTimer: ".$this->coughtTimer." bubbleTimer: ".$this->bubbleTimer);
 		$this->timings->stopTiming();
 
 		return $hasUpdate;
@@ -199,8 +206,9 @@ class FishingHook extends Projectile {
 		}
 
 		$entityHit->attack($ev);
-
-		$entityHit->setMotion($this->getOwningEntity()->getDirectionVector()->multiply(-0.3)->add(0, 0.3, 0));
+		if($this->getOwningEntity() !== null){
+			$entityHit->setMotion($this->getOwningEntity()->getDirectionVector()->multiply(-0.3)->add(0, 0.3, 0));
+		}
 
 		$this->isCollided = true;
 		$this->flagForDespawn();
