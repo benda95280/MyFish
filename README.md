@@ -8,21 +8,29 @@ If you wanna help me, you will find on what i'm stuck at the bottom of the page
 https://github.com/CortexPE/TeaSpoon/
 https://github.com/TuranicTeam/Altay
 
-# NOTE (27/06/2020) :
-Added level system, it change :
-- The distance of the hook
-- Chance to catch something
-- Precision when you lanch the hook (More level, more precise)
+# MyFish
+Plugin that add support to be able to fish in PocketMine !
+This plugin is not intended to be like Vanilla
+
+# Feature :
+Works based on level system (Max 10)
+- The distance of the hook change beased on your level
+- You've chance to catch nothing
+- Precision when you launch the hook (35°/-35°) (More level, more precise)
+- OnScreen display when XP, show current % of the level
 - A plugin is availaible in my repo for ScoreBoard
-- Any return, idea on it (Issue on GH / Discord) would be apreciated !
+
+# Screenshot :
+![Screen1](https://i.imgur.com/K5x2rv6.png)
+
+
+
 
 -----------------
 
-# MyFish
 
-Plugin that add support to be able to fish in PocketMine !
-This plugin is not intended to be like Vanilla
-Support Level (MAX 10)
+
+Any return, idea on it (Issue on GH / Discord) would be apreciated !
 
 # Looking to add :
 - [X] Level support
