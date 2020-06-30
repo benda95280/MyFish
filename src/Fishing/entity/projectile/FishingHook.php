@@ -96,7 +96,9 @@ class FishingHook extends Projectile {
 				}
 			}
 
-			if ($d10 > 0) {				
+			if ($d10 > 0) {	
+				//Little annimation floating
+				if ($currentTick % 60 === 0) $this->motion->y =-0.02;
 				//Wait Wait, we are waiting the fish
 				if($this->attractTimer === 0){
 					//Set bubble timer, fish is near !
@@ -111,7 +113,7 @@ class FishingHook extends Projectile {
 					if ($this->bubbleTimer <= 0 && $this->coughtTimer === 0) {
 						$this->coughtTimer = mt_rand(3, 5) * 20;
 						if($oe instanceof Player){
-							$oe->sendTip("A fish bites!");
+							$oe->sendTip("Il y a un poisson !");
 						}
 						$this->fishBites();
 						$this->bitesTicks = mt_rand(1, 3) * 20;
@@ -141,8 +143,13 @@ class FishingHook extends Projectile {
 					else {
 						$this->bitesTicks--;
 					}
-					//Reset the timer
-					if ($this->attractTimer === 0) $this->attractTimer = mt_rand(30, 100) * 20;
+	
+					//Too late, fish has gone, reset timer
+					if ($this->coughtTimer === 0)
+					{
+						$oe->sendTip("Trop tard, il est parti ...");
+						$this->attractTimer = mt_rand(30, 100) * 20;
+					}
 				}
 				
 			}
@@ -167,10 +174,7 @@ class FishingHook extends Projectile {
 	public function attractFish(){
 		$oe = $this->getOwningEntity();
 		if($oe instanceof Player){
-			$pk = new ActorEventPacket();
-			$pk->entityRuntimeId = $this->getId();
-			$pk->event = ActorEventPacket::FISH_HOOK_BUBBLE;
-			PMServer::getInstance()->broadcastPacket($this->getViewers(), $pk);
+			$this->broadcastEntityEvent(ActorEventPacket::FISH_HOOK_BUBBLE);
 		}
 		$this->level->addParticle(new GenericParticle(new Vector3($this->x, $this->y - 0.1, $this->z), Particle::TYPE_BUBBLE));
 	}
@@ -178,11 +182,9 @@ class FishingHook extends Projectile {
 	public function fishBites(){
 		$oe = $this->getOwningEntity();
 		if($oe instanceof Player){
-			$pk = new ActorEventPacket();
-			$pk->entityRuntimeId = $this->getId();
-			$pk->event = ActorEventPacket::FISH_HOOK_HOOK;
-			PMServer::getInstance()->broadcastPacket($this->getViewers(), $pk);
+			$this->broadcastEntityEvent(ActorEventPacket::FISH_HOOK_HOOK);
 		}
+		$this->motion->y =-0.08;
 	}
 
 	public function onHitEntity(Entity $entityHit, RayTraceResult $hitResult): void{

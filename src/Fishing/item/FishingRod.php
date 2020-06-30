@@ -17,6 +17,7 @@ use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\item\Tool;
 use pocketmine\item\Item;
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\level\Level;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
@@ -37,67 +38,74 @@ class FishingRod extends Tool {
 	public function onClickAir(Player $player, Vector3 $directionVector): bool{
 			$session = Fishing::getInstance()->getSessionById($player->getId());
 			if($session instanceof Session){
-				if(!$session->fishing){
-					
-					$nbt = Entity::createBaseNBT($player->add(0, $player->getEyeHeight(), 0), $directionVector, $player->yaw, $player->pitch);
+				$playerFishingLevel = FishingLevel::getFishingLevel($player);
+				if(!$session->fishing) {
+					//Cannot fish at night when under level 3
+					$time = $player->getLevel()->getTimeOfDay();
+					if (($time < Level::TIME_SUNSET || $time > Level::TIME_SUNRISE) && $playerFishingLevel < 3) {
+						$nbt = Entity::createBaseNBT($player->add(0, $player->getEyeHeight(), 0), $directionVector, $player->yaw, $player->pitch);
 
-					/** @var FishingHook $projectile */
-					$projectile = Entity::createEntity($this->getProjectileEntityType(), $player->getLevel(), $nbt, $player);
-					if($projectile !== null){
-						//Level impact ThrowForce
-						$throwForce = $this->getThrowForce();
-						
-						$throwForcePercent = FishingLevel::getFishingLevel($player)*6-30;
-						$throwForceToAdd = ($throwForce / 100) * $throwForcePercent ;
-						$throwForce = $throwForce + $throwForceToAdd;
-						$projectile->setMotion($projectile->getMotion()->multiply($throwForce));
-					}
-					
-					//change the location where sending hook projectile
-
-						$degreeToRand = 30/(FishingLevel::getFishingLevel($player) == 0 ? 1 : FishingLevel::getFishingLevel($player));
-						$randomRotation = floor(rand()/getrandmax()*($degreeToRand*2)-$degreeToRand) ;
-						$randomRotationRadian = $randomRotation * (M_PI/180);
-						$hookMotion = $projectile->getMotion();
-						$theta = deg2rad($randomRotation);
-						$cos = cos($theta);
-						$sin = sin($theta);
-						$px = $hookMotion->x * $cos - $hookMotion->z * $sin; 
-						$pz = $hookMotion->x * $sin + $hookMotion->z * $cos;
-						$projectile->setMotion(new Vector3($px, $hookMotion->y, $pz));
-
-					if($projectile instanceof Projectile){
-						$player->getServer()->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
-						if($projectileEv->isCancelled()){
-							$projectile->flagForDespawn();
-						}else{
-							$projectile->spawnToAll();
-							$player->getLevel()->addSound(new LaunchSound($player), $player->getViewers());
+						/** @var FishingHook $projectile */
+						$projectile = Entity::createEntity($this->getProjectileEntityType(), $player->getLevel(), $nbt, $player);
+						if($projectile !== null){
+							//Level impact ThrowForce
+							$throwForce = $this->getThrowForce();
+							
+							$throwForcePercent = $playerFishingLevel*6-36;
+							$throwForceToAdd = ($throwForce / 100) * $throwForcePercent ;
+							$throwForce = $throwForce + $throwForceToAdd;
+							$projectile->setMotion($projectile->getMotion()->multiply($throwForce));
 						}
-					}
+						
+						//change the location where sending hook projectile
 
-					//Todo: Wait weather support
-					// $weather = Fishing::$weatherData[$player->getLevel()->getId()];
-					// if(($weather->isRainy() || $weather->isRainyThunder())){
-						// $rand = mt_rand(15, 50);
-					// }else{
-						$rand = mt_rand(30, 100);
-					// }
-					if($this->hasEnchantments()){
-						foreach($this->getEnchantments() as $enchantment){
-							switch($enchantment->getId()){
-								case Enchantment::LURE:
-									$divisor = $enchantment->getLevel() * 0.50;
-									$rand = intval(round($rand / $divisor)) + 3;
-									break;
+							$degreeToRand = 35/$playerFishingLevel;
+							$randomRotation = floor(rand()/getrandmax()*($degreeToRand*2)-$degreeToRand) ;
+							$randomRotationRadian = $randomRotation * (M_PI/180);
+							$hookMotion = $projectile->getMotion();
+							$theta = deg2rad($randomRotation);
+							$cos = cos($theta);
+							$sin = sin($theta);
+							$px = $hookMotion->x * $cos - $hookMotion->z * $sin; 
+							$pz = $hookMotion->x * $sin + $hookMotion->z * $cos;
+							$projectile->setMotion(new Vector3($px, $hookMotion->y, $pz));
+
+						if($projectile instanceof Projectile){
+							$player->getServer()->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
+							if($projectileEv->isCancelled()){
+								$projectile->flagForDespawn();
+							}else{
+								$projectile->spawnToAll();
+								$player->getLevel()->addSound(new LaunchSound($player), $player->getViewers());
 							}
 						}
+
+						//Todo: Wait weather support
+						// $weather = Fishing::$weatherData[$player->getLevel()->getId()];
+						// if(($weather->isRainy() || $weather->isRainyThunder())){
+							// $rand = mt_rand(15, 50);
+						// }else{
+							$rand = mt_rand(30, 100);
+						// }
+						if($this->hasEnchantments()){
+							foreach($this->getEnchantments() as $enchantment){
+								switch($enchantment->getId()){
+									case Enchantment::LURE:
+										$divisor = $enchantment->getLevel() * 0.50;
+										$rand = intval(round($rand / $divisor)) + 3;
+										break;
+								}
+							}
+						}
+
+						$projectile->attractTimer = $rand * 0;
+
+						$session->fishingHook = $projectile;
+						$session->fishing = true;
 					}
-
-					$projectile->attractTimer = $rand * 20;
-
-					$session->fishingHook = $projectile;
-					$session->fishing = true;
+					else {
+						$player->sendTip("Niveau trop faible pour pecher la nuit");
+					}
 				}else{
 					$projectile = $session->fishingHook;
 					if($projectile instanceof FishingHook){
@@ -124,18 +132,19 @@ class FishingRod extends Tool {
 						//	}else{
 						//		$lvl = 0;
 						//	}
-							//Level of player impact chance of get something, When level > 4, no more impacted
-							//Level of Enchant LUCK_OF_THE_SEA impact chance
-							if (FishingLevel::getFishingLevel($player) < (4+$lvl) AND mt_rand(FishingLevel::getFishingLevel($player), (10+$lvl)) <= (3+$lvl)) {
+							//Level of player impact chance to catch something
+							//Level of Enchant LUCK_OF_THE_SEA impact chance too
+							if (mt_rand($playerFishingLevel, (11+$lvl)) <= (4+$lvl)) {
 								$item = FishingLootTable::getRandom($lvl);
 								$player->getInventory()->addItem($item);
 								FishingLevel::addFishingExp(mt_rand(3, 6), $player);
-								$player->addXp(mt_rand(3, 6));
+								$player->addXp(mt_rand(2, 4), false);
 							}
 							else {
 								FishingLevel::addFishingExp(mt_rand(1, 3), $player);
-								$player->addXp(mt_rand(1, 3),false);
-								$player->sendTip("Failed :(");
+								$player->addXp(mt_rand(1, 2),false);
+								$player->knockBack($projectile, 0, $player->x - $projectile->x, $player->z - $projectile->z, (0.3/$playerFishingLevel));
+								$player->sendTip("Il s'est échappé !");
 							}
 							
 

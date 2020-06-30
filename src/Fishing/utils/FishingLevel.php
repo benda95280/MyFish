@@ -7,6 +7,7 @@ namespace Fishing\utils;
 
 use Fishing\Fishing;
 use pocketmine\utils\Config;
+use pocketmine\utils\TextFormat;
 use pocketmine\Player;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 
@@ -47,6 +48,7 @@ class FishingLevel {
 			$te->data = 0;
 			$player->dataPacket($te);				
 		}
+		else self::sendFishingRemainingPopup($player);
 	}
 
 	public static function getFishingLevel(Player $player):int {
@@ -54,9 +56,31 @@ class FishingLevel {
 		$currentExp = self::$levelFile->get($playerId,0);
 		
 		$scale = 2;
-		$level = intval(floor(pow($currentExp/100,1/$scale)));
+		$level = intval(floor(pow($currentExp/100,1/$scale)))+1;
 		if ($level > 10) $level = 10;
 		return $level;
+	}
+	
+	public static function sendFishingRemainingPopup(Player $player) {
+		$prevLvlExpNeeded = self::getFishingLevelExpNeeded( self::getFishingLevel($player) );
+		$nextLvlExpNeeded = self::getFishingLevelExpNeeded( self::getFishingLevel($player) + 1);
+		$player->sendTip(self::getProgress(self::getFishingExp($player) - $prevLvlExpNeeded, $nextLvlExpNeeded - $prevLvlExpNeeded));
+	}
+	
+	public static function getFishingLevelExpNeeded(int $level):int {
+		return (100*($level)**2) - (200*($level)) + 100;
+	}
+	
+	public static function getProgress(int $progress, int $size): string {
+		// $divide = $size > 750 ? 50 : ($size > 500 ? 20 : ($size > 300 ? 15 : ($size > 200 ? 10 : ($size > 100 ? 5 : 3)))); // for short bar
+		$divide = 27201030 + (7.578379 - 27201030)/(1 + ($size/129623)**2.597146);
+		$percentage = number_format(($progress / $size) * 100, 2);
+		$progress = (int) ceil($progress / $divide);
+		$size = (int) ceil($size / $divide);
+
+		return TextFormat::GRAY . "[" . TextFormat::GREEN . str_repeat("|", $progress) .
+			TextFormat::RED . str_repeat("|", $size - $progress) . TextFormat::GRAY . "] " .
+			TextFormat::AQUA . "{$percentage} %%";
 	}
 	
 	public static function saveConfig() {
