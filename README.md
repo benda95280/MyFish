@@ -23,13 +23,13 @@ Works based on level system (Max 10)
 - Fish have a size (CustomNBT name "FishSize") based on EnchantLevel, PlayerLevel, LightLevel
 
 #Math
-- Max distance of the Hook in block : Between 7 and 25 
-Calc : ((25 - (10 - $playerFishingLevel)*2)
+- Max distance of the Hook in block : Between 7 and 25
+  - Calc : ((25 - (10 - $playerFishingLevel)*2)
 - 42% Chance to catch something at lvl 1 (Enchant Level can change it to 46% at Enchant lvl 1, to 52% lvl 3)
 - 77% Chance to catch something at lvl 10 (Enchant Level can change it to 80% at Enchant lvl 1, to 83% lvl 3)
-Calc : (mt_rand($playerFishingLevel, round(11+$lvl+sqrt($playerFishingLevel+2)*2)) <= round(2+$lvl+sqrt($playerFishingLevel)*4.4))
+  - Calc : (mt_rand($playerFishingLevel, round(11+$lvl+sqrt($playerFishingLevel+2)*2)) <= round(2+$lvl+sqrt($playerFishingLevel)*4.4))
 - Fish size is between 3cm to 166cm
-Calc : round(5 * $playerFishingLevel * (($lvlEnchant+2)/3) * (((-1/15)*$lightLevelAtHook)+2));
+  - Calc : round(5 * $playerFishingLevel * (($lvlEnchant+2)/3) * (((-1/15)*$lightLevelAtHook)+2));
 
 # Screenshot :
 ![Screen1](https://i.imgur.com/K5x2rv6.png)
