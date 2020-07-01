@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Fishing\entity\projectile;
 
 use Fishing\Fishing;
+use Fishing\utils\FishingLevel;
 use Fishing\Session;
 use pocketmine\block\StillWater;
 use pocketmine\block\Water;
@@ -39,6 +40,7 @@ class FishingHook extends Projectile {
 	public $bitesTicks = 0;
 	public $attractTimer = 0;
 	public $attractTimerTicks = 0;
+	public $lightLevelAtHook = 0;
 	protected $gravity = 0.1;
 	protected $drag = 0.05;
 	protected $touchedWater = false;
@@ -61,17 +63,18 @@ class FishingHook extends Projectile {
 			
 		//Remove if Owner too far
 		if($oe instanceof Player){
-			if ($this->getPosition()->distance($oe->getPosition()) > 25) {
+			if ( $this->getPosition()->distance($oe->getPosition()) > (25 - (10 - FishingLevel::getFishingLevel($oe))*2) ) {
 				$session = Fishing::getInstance()->getSessionById($oe->getId());
 				if($session instanceof Session){
+					$oe->sendTip(Fishing::getInstance()->lang["linebreaklvltoolow"]);
 					$session->unsetFishing();
 				}	
 			}
 		}
 		
 		//calculate timer for attractTimer
-		$lightLevelAtHook = $this->level->getBlockSkyLightAt(intval($this->x), intval($this->y), intval($this->z));
-		$this->attractTimer = ($this->baseTimer * (((-1/15)*$lightLevelAtHook)+2)) - $this->attractTimerTicks;
+		$this->lightLevelAtHook = $this->level->getBlockSkyLightAt(intval($this->x), intval($this->y), intval($this->z));
+		$this->attractTimer = ($this->baseTimer * (((-1/15)*$this->lightLevelAtHook)+2)) - $this->attractTimerTicks;
 
 		$this->timings->startTiming();
 
@@ -153,7 +156,7 @@ class FishingHook extends Projectile {
 					//Too late, fish has gone, reset timer
 					if ($this->coughtTimer <= 0)
 					{
-						$oe->sendTip("Trop tard, il est parti ...");
+						$oe->sendTip(Fishing::getInstance()->lang["tooslowfishhasgoneaway"]);
 						$this->baseTimer = mt_rand(30, 100) * 20;
 						$this->attractTimerTicks = 0;
 					}

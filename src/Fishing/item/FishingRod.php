@@ -21,6 +21,9 @@ use pocketmine\level\Level;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\StringTag;
+
 
 class FishingRod extends Tool {
 	public function __construct($meta = 0){
@@ -98,13 +101,13 @@ class FishingRod extends Tool {
 							}
 						}
 
-						$projectile->baseTimer = $rand * 20;
+						$projectile->baseTimer = $rand * 0;
 
 						$session->fishingHook = $projectile;
 						$session->fishing = true;
 					}
 					else {
-						$player->sendTip("Niveau trop faible pour pecher la nuit");
+						$player->sendTip(Fishing::getInstance()->lang["lvltoolownight"]);
 					}
 				}else{
 					$projectile = $session->fishingHook;
@@ -134,8 +137,14 @@ class FishingRod extends Tool {
 						//	}
 							//Level of player impact chance to catch something
 							//Level of Enchant LUCK_OF_THE_SEA impact chance too
-							if (mt_rand($playerFishingLevel, (11+$lvl)) <= (4+$lvl)) {
+							 if (mt_rand($playerFishingLevel, intval(round(11+$lvl+sqrt($playerFishingLevel+2)*2))) <= round(2+$lvl+sqrt($playerFishingLevel)*4.4)) {
 								$item = FishingLootTable::getRandom($lvl);
+								if($item->getId() === 349 OR $item->getId() === 460) {
+									$size = round(5 * $playerFishingLevel * (($lvl+2)/3) * (((-1/15)*$projectile->lightLevelAtHook)+2));
+									$item->setCustomBlockData(new CompoundTag("", [
+										new StringTag("FishSize", strval($size))
+									]))->setLore(array(Fishing::getInstance()->lang["fishsize"].": ".$size." cm"));
+								}
 								$player->getInventory()->addItem($item);
 								FishingLevel::addFishingExp(mt_rand(3, 6), $player);
 								$player->addXp(mt_rand(2, 4), false);
@@ -144,7 +153,7 @@ class FishingRod extends Tool {
 								FishingLevel::addFishingExp(mt_rand(1, 3), $player);
 								$player->addXp(mt_rand(1, 2),false);
 								$player->knockBack($projectile, 0, $player->x - $projectile->x, $player->z - $projectile->z, (0.3/$playerFishingLevel));
-								$player->sendTip("Il s'est échappé !");
+								$player->sendTip(Fishing::getInstance()->lang["fishhasgoneaway"]);
 							}
 							
 

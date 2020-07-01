@@ -28,6 +28,8 @@ class Fishing extends PluginBase {
 	public static $cacheFile;
 	public static $levelFile;
 	
+	public $lang;
+	
 	public static $randomFishingLootTables = true;
 	public static $registerVanillaEnchantments = true;
 
@@ -39,7 +41,19 @@ class Fishing extends PluginBase {
 	    if(!self::$instance instanceof Fishing){
 	        self::$instance = $this;
 	    }
+		@mkdir($this->getDataFolder());
 		self::$cacheFile = new Config($this->getDataFolder() . "cache.json", Config::JSON);
+		//Lang init
+        new Config($this->getDataFolder() . 'lang.yml', Config::YAML, array(
+            "lvlup" => "! Fishing LVL Up !",
+            "lvltoolownight" => "Niveau trop faible pour pecher la nuit",
+            "fishsize" => "Taille",
+            "fishhasgoneaway" => "Il s'est échappé !",
+            "linebreaklvltoolow" => "Ma ligne a cassée, mon niveau est trop faible.",
+            "tooslowfishhasgoneaway" => "Trop tard, il est parti ...",
+        ));
+		
+		$this->lang = (array)yaml_parse_file($this->getDataFolder() . "lang.yml");
 	}
 	
     public function onEnable(){

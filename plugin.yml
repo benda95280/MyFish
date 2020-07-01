@@ -1,6 +1,6 @@
 name: Fishing
 main: Fishing\Fishing
-version: 0.3
+version: 0.4
 api: [3.0.0]
 load: STARTUP
 author: benda95280

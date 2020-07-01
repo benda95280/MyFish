@@ -41,7 +41,7 @@ class FishingLevel {
 		$currentExp = self::$levelFile->get($playerId,0);
 		self::$levelFile->set($playerId, $currentExp + $exp);
 		if ($previousLevel != self::getFishingLevel($player) ) {
-			$player->sendTip("! Fishing LVL Up !");
+			$player->sendTip(Fishing::getInstance()->lang["lvlup"]);
 			$te = new LevelEventPacket();
 			$te->evid = LevelEventPacket::EVENT_SOUND_TOTEM;
 			$te->position = $player->add(0, $player->eyeHeight, 0);
@@ -72,7 +72,6 @@ class FishingLevel {
 	}
 	
 	public static function getProgress(int $progress, int $size): string {
-		// $divide = $size > 750 ? 50 : ($size > 500 ? 20 : ($size > 300 ? 15 : ($size > 200 ? 10 : ($size > 100 ? 5 : 3)))); // for short bar
 		$divide = 27201030 + (7.578379 - 27201030)/(1 + ($size/129623)**2.597146);
 		$percentage = number_format(($progress / $size) * 100, 2);
 		$progress = (int) ceil($progress / $divide);
