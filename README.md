@@ -44,7 +44,7 @@ Works based on level system (Max 10)
 Any return, idea on it (Issue on GH / Discord) would be apreciated !
 
 # Looking to add :
-- [ ] Fishing calc is ... weird !
+- [ ] Fishing chance calc is ... weird !
 - [ ] Calculation of the LightLevel of the Hook change when in water :(
 - [ ] Animation for fish that move the Hook (Like real fish)
 - [ ] Animation / Particle to water like Vanilla
