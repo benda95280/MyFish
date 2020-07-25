@@ -21,6 +21,7 @@ Works based on level system (Max 10)
 - OnScreen display when XP, show current % of the level
 - A plugin is availaible in my repo for ScoreBoard
 - Fish have a size (CustomNBT name "FishSize") based on EnchantLevel, PlayerLevel, LightLevel
+- Player under level 4 cannot fish at night
 
 #Math
 - Max distance of the Hook in block : Between 7 and 25

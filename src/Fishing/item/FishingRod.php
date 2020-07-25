@@ -45,7 +45,7 @@ class FishingRod extends Tool {
 				if(!$session->fishing) {
 					//Cannot fish at night when under level 3
 					$time = $player->getLevel()->getTimeOfDay();
-					if (($time < Level::TIME_SUNSET || $time > Level::TIME_SUNRISE) && $playerFishingLevel < 3) {
+					if ((($time < Level::TIME_SUNSET || $time > Level::TIME_SUNRISE) && $playerFishingLevel <= 3) || $playerFishingLevel > 3) {
 						$nbt = Entity::createBaseNBT($player->add(0, $player->getEyeHeight(), 0), $directionVector, $player->yaw, $player->pitch);
 
 						/** @var FishingHook $projectile */
