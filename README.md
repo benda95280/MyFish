@@ -15,6 +15,8 @@ This plugin is not intended to be like Vanilla
 # Feature :
 Works based on level system (Max 10)
 - The distance (Force) of the hook change beased on your level
+- More level you have, more distance you can try to send the hook, if you'r too low, your line break !
+- At night, if you'r under level 3, you can't fish !
 - You've chance to catch nothing
 - Precision when you launch the hook (35°/-35°) (More level, more precise)
 - Light Level change the time to catch a fish
@@ -45,7 +47,7 @@ Works based on level system (Max 10)
 Any return, idea on it (Issue on GH / Discord) would be apreciated !
 
 # Looking to add :
-- [ ] Fishing calc is ... weird !
+- [ ] Fishing chance calc is ... weird !
 - [ ] Calculation of the LightLevel of the Hook change when in water :(
 - [ ] Animation for fish that move the Hook (Like real fish)
 - [ ] Animation / Particle to water like Vanilla
